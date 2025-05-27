@@ -1,41 +1,53 @@
-import { Controller, Delete, Get, Patch, Post } from '@nestjs/common';
+import {
+  Controller,
+  Delete,
+  Get,
+  NotFoundException,
+  Param,
+  Patch,
+  Post,
+} from '@nestjs/common';
 import { AppService } from './app.service';
+
+interface Movie {
+  id: number;
+  title: string;
+}
 
 @Controller('movie')
 export class AppController {
+  private movies: Movie[] = [
+    {
+      id: 1,
+      title: '해리포터',
+    },
+    {
+      id: 2,
+      title: '트와일라잇',
+    },
+  ];
+
   constructor(private readonly appService: AppService) {}
 
   @Get('')
   getMovies() {
-    return [
-      {
-        id: 1,
-        name: '해리포터',
-        character: ['해리포터', '헤르미온느'],
-      },
-      {
-        id: 2,
-        name: '트와일라잇',
-        character: ['벨라', '애드워드'],
-      },
-    ];
+    return this.movies;
   }
 
   @Get(':id')
-  getMovie() {
-    return {
-      id: 1,
-      name: '해리포터',
-      character: ['해리포터', '헤르미온느'],
-    };
+  getMovie(@Param('id') id: string) {
+    const movie = this.movies.find((movie) => movie.id === Number(id));
+    if (!movie) {
+      throw new NotFoundException('존재하지 않는 ID 값의 영화입니다.');
+    }
+    return movie;
   }
 
   @Post()
   postMovie() {
     return {
       id: 3,
-      name: '어벤져스',
-      character: ['아이언맨', '토르'],
+      title: '어벤져스',
     };
   }
 
@@ -43,8 +55,7 @@ export class AppController {
   patchMovie() {
     return {
       id: 3,
-      name: '어벤져스',
-      character: ['아이언맨', '블랙위도우'],
+      title: '어벤져스',
     };
   }
 

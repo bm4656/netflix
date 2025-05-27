@@ -7,6 +7,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import { AppService } from './app.service';
 
@@ -31,9 +32,13 @@ export class AppController {
 
   constructor(private readonly appService: AppService) {}
 
-  @Get('')
-  getMovies() {
-    return this.movies;
+  @Get()
+  getMovies(@Query('title') title?: string) {
+    if (!title) {
+      return this.movies;
+    }
+
+    return this.movies.filter((movie) => movie.title.startsWith(title));
   }
 
   @Get(':id')

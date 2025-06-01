@@ -4,7 +4,14 @@ import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(
+    new ValidationPipe({
+      // 기본값 false, true로 설정하면 DTO에 정의되지 않은 값들은 전달되지 않는다.(원래는 들어가버림)
+      whitelist: true,
+      // 기본값 false, true로 설정하면 정의되지 않은 값들에 대해 예외를 발생시킨다.
+      forbidNonWhitelisted: true,
+    }),
+  );
   await app.listen(process.env.PORT ?? 3000);
 }
 

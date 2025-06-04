@@ -13,7 +13,7 @@ export class MovieService {
     movie1.id = 1;
     movie1.title = 'The Shawshank Redemption';
     movie1.genre = 'Drama';
-    
+
     const movie2 = new Movie();
     movie2.id = 2;
     movie2.title = 'The Godfather';
@@ -44,6 +44,9 @@ export class MovieService {
     const movie: Movie = {
       id: this.idCounter++,
       ...createMovieDto,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      version: 0,
     };
 
     this.movies.push(movie);

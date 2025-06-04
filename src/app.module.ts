@@ -1,7 +1,37 @@
 import { Module } from '@nestjs/common';
 import { MovieModule } from './movie/movie.module';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import * as Joi from 'joi';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({
-  imports: [MovieModule],
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true, // ConfigModule을 전역 모듈로 설정
+      validationSchema: Joi.object({
+        ENV: Joi.string().valid('dev', 'prod').required(),
+        DB_TYPE: Joi.string().valid('postgres').required(),
+        DB_HOST: Joi.string().required(),
+        DB_PORT: Joi.number().required(),
+        DB_USERNAME: Joi.string().required(),
+        DB_PASSWORD: Joi.string().required(),
+        DB_DATABASE: Joi.string().required(),
+      }),
+    }),
+    TypeOrmModule.forRootAsync({
+      useFactory: (configureService: ConfigService) => ({
+        type: configureService.get<string>('DB_TYPE') as 'postgres',
+        host: configureService.get<string>('DB_HOST'),
+        port: configureService.get<number>('DB_PORT'),
+        username: configureService.get<string>('DB_USERNAME'),
+        password: configureService.get<string>('DB_PASSWORD'),
+        database: configureService.get<string>('DB_DATABASE'),
+        entities: [],
+        synchronize: true,
+      }),
+      inject: [ConfigService],
+    }),
+    MovieModule,
+  ],
 })
 export class AppModule {}

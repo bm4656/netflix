@@ -23,7 +23,9 @@ export class Movie extends BaseTable {
   @Column()
   genre: string;
 
-  @OneToOne(() => MovieDetail)
+  @OneToOne(() => MovieDetail, (movieDetail) => movieDetail.id, {
+    cascade: true, // Create, Update, Delete 시 MovieDetail도 함께 처리
+  })
   @JoinColumn()
   detail: MovieDetail;
 }

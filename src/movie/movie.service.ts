@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateMovieDto } from './dto/create.movie.dto';
 import { UpdateMovieDto } from './dto/update.movie.dto';
 import { Movie } from './entity/movie.entity';
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
@@ -13,7 +13,16 @@ export class MovieService {
   ) {}
 
   async getMovies(title: string) {
-    return this.movieRepositry.find();
+    if (!title) {
+      return [
+        await this.movieRepositry.find(),
+        await this.movieRepositry.count(),
+      ];
+    }
+
+    return this.movieRepositry.findAndCount({
+      where: { title: Like(`%${title}%`) },
+    });
   }
 
   async getMovieById(id: number) {

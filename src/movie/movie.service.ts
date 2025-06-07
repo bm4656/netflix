@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreateMovieDto } from './dto/create.movie.dto';
-import { UpdateMovieDto } from './dto/update.movie.dto';
+import { CreateMovieDto } from './dto/create-movie.dto';
+import { UpdateMovieDto } from './dto/update-movie.dto';
 import { Movie } from './entity/movie.entity';
 import { Like, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';

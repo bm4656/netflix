@@ -9,23 +9,23 @@ import {
 
 export class UpdateMovieDto {
   @IsNotEmpty()
-  @IsOptional()
   @IsString()
+  @IsOptional()
   title?: string;
 
   @IsNotEmpty()
-  @IsOptional()
   @IsString()
+  @IsOptional()
   detail?: string;
 
   @IsNotEmpty()
-  @IsOptional()
   @IsNumber()
+  @IsOptional()
   directorId?: number;
 
   @IsArray()
   @ArrayNotEmpty()
-  @IsOptional()
   @IsNumber({}, { each: true })
+  @IsOptional()
   genreIds?: number[];
 }

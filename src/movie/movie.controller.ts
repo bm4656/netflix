@@ -18,26 +18,26 @@ export class MovieController {
 
   @Get()
   getMovies(@Query('title') title?: string) {
-    return this.movieService.getMovies(title);
+    return this.movieService.findAll(title);
   }
 
   @Get(':id')
   getMovie(@Param('id') id: string) {
-    return this.movieService.getMovieById(Number(id));
+    return this.movieService.findOne(Number(id));
   }
 
   @Post()
   postMovie(@Body() body: CreateMovieDto) {
-    return this.movieService.createMovie(body);
+    return this.movieService.create(body);
   }
 
   @Patch(':id')
   patchMovie(@Param('id') id: string, @Body() body: UpdateMovieDto) {
-    return this.movieService.updateMovie(Number(id), body);
+    return this.movieService.update(Number(id), body);
   }
 
   @Delete(':id')
   deleteMovie(@Param('id') id: string) {
-    return this.movieService.deleteMovie(Number(id));
+    return this.movieService.remove(Number(id));
   }
 }

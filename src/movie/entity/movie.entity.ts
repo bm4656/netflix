@@ -19,7 +19,9 @@ export class Movie extends BaseTable {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({
+    unique: true, // 제목은 유일해야 한다.
+  })
   title: string;
 
   @Column()

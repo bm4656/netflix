@@ -1,9 +1,11 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
   Get,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
   Query,
@@ -22,7 +24,17 @@ export class MovieController {
   }
 
   @Get(':id')
-  getMovie(@Param('id') id: string) {
+  getMovie(
+    @Param(
+      'id',
+      new ParseIntPipe({
+        exceptionFactory() {
+          return new BadRequestException(`숫자를 입력해주세요!`);
+        },
+      }),
+    )
+    id: number,
+  ) {
     return this.movieService.findOne(Number(id));
   }
 

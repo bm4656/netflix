@@ -5,6 +5,7 @@ import {
   Delete,
   Get,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
   UseInterceptors,
@@ -24,8 +25,8 @@ export class DirectorController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.directorService.findOne(+id);
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.directorService.findOne(id);
   }
 
   @Post()
@@ -35,14 +36,14 @@ export class DirectorController {
 
   @Patch(':id')
   update(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Body() updateDirectorDto: UpdateDirectorDto,
   ) {
-    return this.directorService.update(+id, updateDirectorDto);
+    return this.directorService.update(id, updateDirectorDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.directorService.remove(+id);
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.directorService.remove(id);
   }
 }

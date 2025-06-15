@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import { envVariableKeys } from '../common/const/env.const';
 
 @Injectable()
 export class AuthService {
@@ -53,7 +54,7 @@ export class AuthService {
 
     try {
       const payload = await this.jwtService.verifyAsync(token, {
-        secret: this.configService.get<string>('REFRESH_TOKEN_SECRET'),
+        secret: this.configService.get<string>(envVariableKeys.refreshTokenSecret),
       });
 
       if (isRefreshToken) {
@@ -83,7 +84,10 @@ export class AuthService {
       throw new BadRequestException('이미 가입한 이메일입니다!');
     }
 
-    const hash = await bcrypt.hash(password, this.configService.get<number>('HASH_ROUNDS'));
+    const hash = await bcrypt.hash(
+      password,
+      this.configService.get<number>(envVariableKeys.hashRounds),
+    );
 
     return await this.userRepository.save({
       email,
@@ -110,8 +114,8 @@ export class AuthService {
   }
 
   async issueToken(user: User, isRefreshToken: boolean) {
-    const refreshTokenSecret = this.configService.get<string>('REFRESH_TOKEN_SECRET');
-    const accessTokenSecret = this.configService.get<string>('ACCESS_TOKEN_SECRET');
+    const refreshTokenSecret = this.configService.get<string>(envVariableKeys.accessTokenSecret);
+    const accessTokenSecret = this.configService.get<string>(envVariableKeys.refreshTokenSecret);
 
     return this.jwtService.signAsync(
       {

@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../user/entity/user.entity';
 import { Repository } from 'typeorm';
@@ -36,6 +36,40 @@ export class AuthService {
       email,
       password,
     };
+  }
+
+  async parseBearerToken(rawToken: string, isRefreshToken: boolean) {
+    const basicSplit = rawToken.split(' ');
+
+    if (basicSplit.length !== 2) {
+      throw new BadRequestException('토큰 포맷이 잘못됐습니다!');
+    }
+
+    const [bearer, token] = basicSplit;
+
+    if (bearer.toLowerCase() !== 'bearer') {
+      throw new BadRequestException('토큰 포맷이 잘못됐습니다!');
+    }
+
+    try {
+      const payload = await this.jwtService.verifyAsync(token, {
+        secret: this.configService.get<string>('REFRESH_TOKEN_SECRET'),
+      });
+
+      if (isRefreshToken) {
+        if (payload.type !== 'refresh') {
+          throw new BadRequestException('Refresh 토큰을 입력 해주세요!');
+        }
+      } else {
+        if (payload.type !== 'access') {
+          throw new BadRequestException('Access 토큰을 입력 해주세요!');
+        }
+      }
+
+      return payload;
+    } catch (e) {
+      throw new UnauthorizedException('토큰이 만료됐습니다!');
+    }
   }
 
   async register(rawToken: string) {

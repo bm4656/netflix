@@ -4,6 +4,7 @@ import { User } from '../user/entity/user.entity';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
@@ -11,6 +12,7 @@ export class AuthService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private readonly configService: ConfigService,
+    private readonly jwtService: JwtService,
   ) {}
 
   parseBasicToken(rawToken: string) {
@@ -47,18 +49,57 @@ export class AuthService {
       throw new BadRequestException('이미 가입한 이메일입니다!');
     }
 
-    const hash = await bcrypt.hash(
-      password,
-      this.configService.get<number>('HASH_ROUNDS'),
-    );
+    const hash = await bcrypt.hash(password, this.configService.get<number>('HASH_ROUNDS'));
 
-    await this.userRepository.save({
+    return await this.userRepository.save({
       email,
       password: hash,
     });
+  }
 
-    return await this.userRepository.findOne({
+  async login(rawToken: string) {
+    const { email, password } = this.parseBasicToken(rawToken);
+
+    const user = await this.userRepository.findOne({
       where: { email },
     });
+
+    if (!user) {
+      throw new BadRequestException('등록되지 않는 이메일입니다!');
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+
+    if (!isPasswordValid) {
+      throw new BadRequestException('비밀번호가 일치하지 않습니다!');
+    }
+
+    const refreshTokenSecret = this.configService.get<string>('REFRESH_TOKEN_SECRET');
+    const accessTokenSecret = this.configService.get<string>('ACCESS_TOKEN_SECRET');
+
+    return {
+      refreshToken: await this.jwtService.signAsync(
+        {
+          sub: user.id,
+          role: user.role,
+          type: 'refresh',
+        },
+        {
+          secret: refreshTokenSecret,
+          expiresIn: '24h',
+        },
+      ),
+      accessToken: await this.jwtService.signAsync(
+        {
+          sub: user.id,
+          role: user.role,
+          type: 'access',
+        },
+        {
+          secret: accessTokenSecret,
+          expiresIn: '300',
+        },
+      ),
+    };
   }
 }

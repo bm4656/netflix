@@ -57,9 +57,7 @@ export class AuthService {
     });
   }
 
-  async login(rawToken: string) {
-    const { email, password } = this.parseBasicToken(rawToken);
-
+  async authenticate(email: string, password: string) {
     const user = await this.userRepository.findOne({
       where: { email },
     });
@@ -73,6 +71,14 @@ export class AuthService {
     if (!isPasswordValid) {
       throw new BadRequestException('비밀번호가 일치하지 않습니다!');
     }
+
+    return user;
+  }
+
+  async login(rawToken: string) {
+    const { email, password } = this.parseBasicToken(rawToken);
+
+    const user = await this.authenticate(email, password);
 
     const refreshTokenSecret = this.configService.get<string>('REFRESH_TOKEN_SECRET');
     const accessTokenSecret = this.configService.get<string>('ACCESS_TOKEN_SECRET');

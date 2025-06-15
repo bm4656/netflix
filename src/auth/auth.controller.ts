@@ -18,7 +18,10 @@ export class AuthController {
 
   @UseGuards(LocalAuthGuard)
   @Post('login/passport')
-  loginUserPassport(@Request() req) {
-    return req.user;
+  async loginUserPassport(@Request() req) {
+    return {
+      refreshToken: await this.authService.issueToken(req.user, true),
+      accessToken: await this.authService.issueToken(req.user, false),
+    };
   }
 }

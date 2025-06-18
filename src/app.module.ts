@@ -14,6 +14,8 @@ import { AuthModule } from './auth/auth.module';
 import { User } from './user/entity/user.entity';
 import { envVariableKeys } from './common/const/env.const';
 import { BearerTokenMiddleware } from './auth/middleware/bearer-token.middleware';
+import { AuthGuard } from './auth/guard/auth.guard';
+import { APP_GUARD } from '@nestjs/core';
 
 @Module({
   imports: [
@@ -50,6 +52,12 @@ import { BearerTokenMiddleware } from './auth/middleware/bearer-token.middleware
     GenreModule,
     UserModule,
     AuthModule,
+  ],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: AuthGuard,
+    },
   ],
 })
 export class AppModule implements NestModule {

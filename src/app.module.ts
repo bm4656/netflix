@@ -1,4 +1,4 @@
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
 import { MovieModule } from './movie/movie.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import * as Joi from 'joi';
@@ -54,6 +54,18 @@ import { BearerTokenMiddleware } from './auth/middleware/bearer-token.middleware
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(BearerTokenMiddleware).exclude('auth/login', 'auth/register').forRoutes('*');
+    consumer
+      .apply(BearerTokenMiddleware)
+      .exclude(
+        {
+          path: 'auth/login',
+          method: RequestMethod.POST,
+        },
+        {
+          path: 'auth/register',
+          method: RequestMethod.POST,
+        },
+      )
+      .forRoutes('*');
   }
 }

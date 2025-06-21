@@ -10,6 +10,9 @@ async function bootstrap() {
       whitelist: true,
       // 기본값 false, true로 설정하면 정의되지 않은 값들에 대해 예외를 발생시킨다.
       forbidNonWhitelisted: true,
+      transformOptions: {
+        enableImplicitConversion: true, // 기본값 false, true로 설정하면 숫자형으로 변환할 수 있는 값들은 숫자로 변환한다.
+      },
     }),
   );
   await app.listen(process.env.PORT ?? 3000);

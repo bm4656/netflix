@@ -17,15 +17,24 @@ export class CommonService {
   }
 
   applyCursorPaginationParamsToQb<T>(qb: SelectQueryBuilder<T>, dto: CursorPaginationDto) {
-    const { id, order, take } = dto;
+    const { cursor, order, take } = dto;
 
-    if (id) {
-      const direction = order === 'ASC' ? '>' : '<';
-
-      qb.where(`${qb.alias}.id ${direction} :id`, { id });
+    if (cursor) {
     }
 
-    qb.orderBy(`${qb.alias}.id`, order);
+    for (let i = 0; i < order.length; i++) {
+      const [column, direction] = order[i].split('_');
+
+      if (direction !== 'ASC' && direction !== 'DESC') {
+        throw new Error(`Order는 ASC 또는 DESC만 허용됩니다. 현재: ${direction}`);
+      }
+
+      if (i === 0) {
+        qb.orderBy(`${qb.alias}.${column}`, direction);
+      } else {
+        qb.addOrderBy(`${qb.alias}.${column}`, direction);
+      }
+    }
 
     qb.take(take);
   }

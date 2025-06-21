@@ -38,23 +38,14 @@ export class MovieService {
     }
 
     // this.commonService.applyPagePaginationParamsToQb(qb, dto);
-    this.commonService.applyCursorPaginationParamsToQb(qb, dto);
+    const { nextCursor } = await this.commonService.applyCursorPaginationParamsToQb(qb, dto);
 
-    return qb.getManyAndCount();
-
-    // if (!title) {
-    //   return [
-    //     await this.movieRepository.find({
-    //       relations: ['director'],
-    //     }),
-    //     await this.movieRepository.count(),
-    //   ];
-    // }
-    //
-    // return this.movieRepository.findAndCount({
-    //   where: { title: Like(`%${title}%`) },
-    //   relations: ['director'],
-    // });
+    const [data, count] = await qb.getManyAndCount();
+    return {
+      data,
+      nextCursor, // 커서가 있으면 다음 페이지를 요청할 때 사용
+      count,
+    };
   }
 
   async findOne(id: number) {

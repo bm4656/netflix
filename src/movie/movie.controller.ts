@@ -9,6 +9,7 @@ import {
   Patch,
   Post,
   Query,
+  Request,
   UseInterceptors,
 } from '@nestjs/common';
 import { MovieService } from './movie.service';
@@ -18,6 +19,7 @@ import { Public } from 'src/auth/decorator/public.decorator';
 import { RBAC } from 'src/auth/decorator/rbac.decorator';
 import { Role } from '../user/entity/user.entity';
 import { GetMoviesDto } from './dto/get-movies.dto';
+import { TransactionInterceptor } from '../common/interceptor/transaction.interceptor';
 
 @Controller('movie')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -40,9 +42,10 @@ export class MovieController {
   }
 
   @RBAC(Role.admin)
+  @UseInterceptors(TransactionInterceptor)
   @Post()
-  postMovie(@Body() body: CreateMovieDto) {
-    return this.movieService.create(body);
+  postMovie(@Body() body: CreateMovieDto, @Request() req) {
+    return this.movieService.create(body, req.queryRunner);
   }
 
   @RBAC(Role.admin)

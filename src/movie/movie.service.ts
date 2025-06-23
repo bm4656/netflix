@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateMovieDto } from './dto/create-movie.dto';
 import { UpdateMovieDto } from './dto/update-movie.dto';
 import { Movie } from './entity/movie.entity';
-import { DataSource, In, Repository } from 'typeorm';
+import { DataSource, In, QueryRunner, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MovieDetail } from './entity/movie-detail.entity';
 import { Director } from '../director/entity/director.entity';
@@ -61,81 +61,59 @@ export class MovieService {
     return movie;
   }
 
-  async create(createMovieDto: CreateMovieDto) {
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
+  async create(createMovieDto: CreateMovieDto, queryRunner: QueryRunner) {
+    const director = await queryRunner.manager.findOne(Director, {
+      where: { id: createMovieDto.directorId },
+    });
 
-    try {
-      const director = await queryRunner.manager.findOne(Director, {
-        where: { id: createMovieDto.directorId },
-      });
-
-      if (!director) {
-        throw new NotFoundException('존재하지 않는 ID의 감독입니다.');
-      }
-
-      const genres = await queryRunner.manager.find(Genre, {
-        where: {
-          id: In(createMovieDto.genreIds),
-        },
-      });
-
-      if (genres.length !== createMovieDto.genreIds.length) {
-        throw new NotFoundException(
-          `존재하지 않는 장르가 포함되어 있습니다! 존재하는 장르 ids -> ${genres.map((genre) => genre.id).join(', ')}`,
-        );
-      }
-
-      const movieDetail = await queryRunner.manager
-        .createQueryBuilder()
-        .insert()
-        .into(MovieDetail)
-        .values({ detail: createMovieDto.detail })
-        .execute();
-
-      const movieDetailId = movieDetail.identifiers[0].id;
-
-      const movie = await queryRunner.manager
-        .createQueryBuilder()
-        .insert()
-        .into(Movie)
-        .values({
-          title: createMovieDto.title,
-          detail: { id: movieDetailId },
-          director,
-        })
-        .execute();
-
-      const movieId = movie.identifiers[0].id;
-
-      await queryRunner.manager
-        .createQueryBuilder()
-        .relation(Movie, 'genres')
-        .of(movieId)
-        .add(genres.map((genre) => genre.id));
-
-      // const movie = await this.movieRepository.save({
-      //   title: createMovieDto.title,
-      //   detail: {
-      //     detail: createMovieDto.detail,
-      //   },
-      //   director,
-      //   genres,
-      // });
-
-      await queryRunner.commitTransaction();
-
-      return this.movieRepository.findOne({
-        where: { id: movieId },
-        relations: ['detail', 'director', 'genres'],
-      });
-    } catch (e) {
-      await queryRunner.rollbackTransaction();
-      throw new NotFoundException(e.message || '영화 생성 중 오류가 발생했습니다.');
-    } finally {
-      await queryRunner.release();
+    if (!director) {
+      throw new NotFoundException('존재하지 않는 ID의 감독입니다.');
     }
+
+    const genres = await queryRunner.manager.find(Genre, {
+      where: {
+        id: In(createMovieDto.genreIds),
+      },
+    });
+
+    if (genres.length !== createMovieDto.genreIds.length) {
+      throw new NotFoundException(
+        `존재하지 않는 장르가 포함되어 있습니다! 존재하는 장르 ids -> ${genres.map((genre) => genre.id).join(', ')}`,
+      );
+    }
+
+    const movieDetail = await queryRunner.manager
+      .createQueryBuilder()
+      .insert()
+      .into(MovieDetail)
+      .values({ detail: createMovieDto.detail })
+      .execute();
+
+    const movieDetailId = movieDetail.identifiers[0].id;
+
+    const movie = await queryRunner.manager
+      .createQueryBuilder()
+      .insert()
+      .into(Movie)
+      .values({
+        title: createMovieDto.title,
+        detail: { id: movieDetailId },
+        director,
+      })
+      .execute();
+
+    const movieId = movie.identifiers[0].id;
+
+    await queryRunner.manager
+      .createQueryBuilder()
+      .relation(Movie, 'genres')
+      .of(movieId)
+      .add(genres.map((genre) => genre.id));
+
+    return await queryRunner.manager.findOne(Movie, {
+      where: { id: movieId },
+      relations: ['detail', 'director', 'genres'],
+    });
   }
 
   async update(id: number, updateMovieDto: UpdateMovieDto) {

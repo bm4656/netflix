@@ -23,7 +23,6 @@ import { Role } from '../user/entity/user.entity';
 import { GetMoviesDto } from './dto/get-movies.dto';
 import { TransactionInterceptor } from '../common/interceptor/transaction.interceptor';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { MovieFilePipe } from './pipe/movie-file.pipe';
 
 @Controller('movie')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -65,12 +64,7 @@ export class MovieController {
   postMovie(
     @Body() body: CreateMovieDto,
     @Request() req,
-    @UploadedFile(
-      new MovieFilePipe({
-        maxSize: 100,
-        mimeType: 'video/mp4',
-      }),
-    )
+    @UploadedFile()
     movie: Express.Multer.File,
   ) {
     console.log(movie);

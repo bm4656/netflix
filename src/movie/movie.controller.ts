@@ -11,7 +11,7 @@ import {
   Post,
   Query,
   Request,
-  UploadedFiles,
+  UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
 import { MovieService } from './movie.service';
@@ -22,7 +22,8 @@ import { RBAC } from 'src/auth/decorator/rbac.decorator';
 import { Role } from '../user/entity/user.entity';
 import { GetMoviesDto } from './dto/get-movies.dto';
 import { TransactionInterceptor } from '../common/interceptor/transaction.interceptor';
-import { FileFieldsInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { MovieFilePipe } from './pipe/movie-file.pipe';
 
 @Controller('movie')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -47,42 +48,32 @@ export class MovieController {
   @RBAC(Role.admin)
   @UseInterceptors(TransactionInterceptor)
   @UseInterceptors(
-    FileFieldsInterceptor(
-      [
-        {
-          name: 'movie',
-          maxCount: 1,
-        },
-        {
-          name: 'poster',
-          maxCount: 2,
-        },
-      ],
-      {
-        limits: {
-          fileSize: 1024 * 1024 * 100, // 100MB
-        },
-        fileFilter: (req, file, callback) => {
-          const allowedTypes = ['video/mp4', 'image/jpeg', 'image/png'];
-          if (!allowedTypes.includes(file.mimetype)) {
-            return callback(new BadRequestException('Invalid file type'), false);
-          }
-          callback(null, true);
-        },
+    FileInterceptor('movie', {
+      limits: {
+        fileSize: 1024 * 1024 * 100, // 100MB
       },
-    ),
+      fileFilter: (req, file, callback) => {
+        const allowedTypes = ['video/mp4', 'image/jpeg', 'image/png'];
+        if (!allowedTypes.includes(file.mimetype)) {
+          return callback(new BadRequestException('Invalid file type'), false);
+        }
+        callback(null, true);
+      },
+    }),
   )
   @Post()
   postMovie(
     @Body() body: CreateMovieDto,
     @Request() req,
-    @UploadedFiles()
-    files: {
-      movie?: Express.Multer.File[];
-      poster?: Express.Multer.File[];
-    },
+    @UploadedFile(
+      new MovieFilePipe({
+        maxSize: 100,
+        mimeType: 'video/mp4',
+      }),
+    )
+    movie: Express.Multer.File,
   ) {
-    console.log(files);
+    console.log(movie);
     return this.movieService.create(body, req.queryRunner);
   }
 

@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   ClassSerializerInterceptor,
   Controller,
@@ -46,16 +47,30 @@ export class MovieController {
   @RBAC(Role.admin)
   @UseInterceptors(TransactionInterceptor)
   @UseInterceptors(
-    FileFieldsInterceptor([
+    FileFieldsInterceptor(
+      [
+        {
+          name: 'movie',
+          maxCount: 1,
+        },
+        {
+          name: 'poster',
+          maxCount: 2,
+        },
+      ],
       {
-        name: 'movie',
-        maxCount: 1,
+        limits: {
+          fileSize: 1024 * 1024 * 20, // 20MB
+        },
+        fileFilter: (req, file, callback) => {
+          const allowedTypes = ['video/mp4', 'image/jpeg', 'image/png'];
+          if (!allowedTypes.includes(file.mimetype)) {
+            return callback(new BadRequestException('Invalid file type'), false);
+          }
+          callback(null, true);
+        },
       },
-      {
-        name: 'poster',
-        maxCount: 2,
-      },
-    ]),
+    ),
   )
   @Post()
   postMovie(

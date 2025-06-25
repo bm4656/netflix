@@ -19,6 +19,7 @@ import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { RBACGuard } from './auth/guard/rbac.guard';
 import { ResponseTimeInterceptor } from './common/interceptor/response-time.interceptor';
 import { ForbiddenFilter } from './common/filter/forbidden.filter';
+import { QueryFailedFilter } from './common/filter/query-failed.filter';
 
 @Module({
   imports: [
@@ -72,6 +73,10 @@ import { ForbiddenFilter } from './common/filter/forbidden.filter';
     {
       provide: APP_FILTER,
       useClass: ForbiddenFilter,
+    },
+    {
+      provide: APP_FILTER,
+      useClass: QueryFailedFilter,
     },
   ],
 })

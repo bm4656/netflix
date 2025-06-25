@@ -60,7 +60,7 @@ export class MovieController {
       ],
       {
         limits: {
-          fileSize: 1024 * 1024 * 20, // 20MB
+          fileSize: 1024 * 1024 * 100, // 100MB
         },
         fileFilter: (req, file, callback) => {
           const allowedTypes = ['video/mp4', 'image/jpeg', 'image/png'];

@@ -9,7 +9,6 @@ import {
   Patch,
   Post,
   Query,
-  Request,
   UseInterceptors,
 } from '@nestjs/common';
 import { MovieService } from './movie.service';
@@ -21,6 +20,8 @@ import { Role } from '../user/entity/user.entity';
 import { GetMoviesDto } from './dto/get-movies.dto';
 import { TransactionInterceptor } from '../common/interceptor/transaction.interceptor';
 import { UserId } from '../user/decorator/user-id.decorator';
+import { QueryRunner } from '../common/decorator/query-runner.decorator';
+import { QueryRunner as QR } from 'typeorm';
 
 @Controller('movie')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -45,8 +46,12 @@ export class MovieController {
   @RBAC(Role.admin)
   @UseInterceptors(TransactionInterceptor)
   @Post()
-  postMovie(@Body() body: CreateMovieDto, @Request() req, @UserId() userId: number) {
-    return this.movieService.create(body, userId, req.queryRunner);
+  postMovie(
+    @Body() body: CreateMovieDto,
+    @QueryRunner() queryRunner: QR,
+    @UserId() userId: number,
+  ) {
+    return this.movieService.create(body, userId, queryRunner);
   }
 
   @RBAC(Role.admin)

@@ -36,7 +36,7 @@ import { v4 } from 'uuid';
             extension = split[split.length - 1];
           }
 
-          callback(null, `${v4()}_${Date.now()}.${extension} `);
+          callback(null, `${v4()}_${Date.now()}.${extension}`);
         },
       }),
     }),

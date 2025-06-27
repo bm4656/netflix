@@ -20,6 +20,8 @@ import { RBACGuard } from './auth/guard/rbac.guard';
 import { ResponseTimeInterceptor } from './common/interceptor/response-time.interceptor';
 import { ForbiddenFilter } from './common/filter/forbidden.filter';
 import { QueryFailedFilter } from './common/filter/query-failed.filter';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
   imports: [
@@ -50,6 +52,10 @@ import { QueryFailedFilter } from './common/filter/query-failed.filter';
         synchronize: true,
       }),
       inject: [ConfigService],
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: join(process.cwd(), 'public'), // 피일을 찾는 경로
+      serveRoot: '/public/', // 위 경로의 파일을 가져오려면 이 서브루트를 앞에 붙여라
     }),
     MovieModule,
     DirectorModule,

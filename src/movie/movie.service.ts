@@ -53,7 +53,7 @@ export class MovieService {
   async findOne(id: number) {
     const movie = this.movieRepository.findOne({
       where: { id },
-      relations: ['detail', 'director', 'genres'],
+      relations: ['detail', 'director', 'genres', 'creator'],
     });
 
     if (!movie) {
@@ -104,6 +104,7 @@ export class MovieService {
         title: createMovieDto.title,
         detail: { id: movieDetailId },
         director,
+        creator: { id: userId },
         movieFilePath: join(movieFolder, createMovieDto.movieFileName),
       })
       .execute();

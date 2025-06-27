@@ -12,7 +12,8 @@ import { MovieDetail } from './movie-detail.entity';
 import { BaseTable } from '../../common/entity/base-table.entity';
 import { Director } from '../../director/entity/director.entity';
 import { Genre } from '../../genre/entity/genre.entity';
-import { Transform } from 'class-transformer'; // ManyToOne Director -> 감독은 여러개의 영화를 만들 수 있다.
+import { Transform } from 'class-transformer';
+import { User } from '../../user/entity/user.entity'; // ManyToOne Director -> 감독은 여러개의 영화를 만들 수 있다.
 
 // ManyToOne Director -> 감독은 여러개의 영화를 만들 수 있다.
 // OneToOne MovieDetail -> 영화는 하나의 상세정보를 가진다.
@@ -23,8 +24,11 @@ export class Movie extends BaseTable {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @ManyToOne(() => User, (user) => user.createMovies)
+  creator: User;
+
   @Column({
-    unique: true, // 제목은 유일해야 한다.
+    unique: true,
   })
   title: string;
 

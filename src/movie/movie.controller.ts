@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   ClassSerializerInterceptor,
   Controller,
@@ -11,7 +10,6 @@ import {
   Post,
   Query,
   Request,
-  UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
 import { MovieService } from './movie.service';
@@ -22,7 +20,6 @@ import { RBAC } from 'src/auth/decorator/rbac.decorator';
 import { Role } from '../user/entity/user.entity';
 import { GetMoviesDto } from './dto/get-movies.dto';
 import { TransactionInterceptor } from '../common/interceptor/transaction.interceptor';
-import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('movie')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -46,28 +43,9 @@ export class MovieController {
 
   @RBAC(Role.admin)
   @UseInterceptors(TransactionInterceptor)
-  @UseInterceptors(
-    FileInterceptor('movie', {
-      limits: {
-        fileSize: 1024 * 1024 * 100, // 100MB
-      },
-      fileFilter: (req, file, callback) => {
-        const allowedTypes = ['video/mp4', 'image/jpeg', 'image/png'];
-        if (!allowedTypes.includes(file.mimetype)) {
-          return callback(new BadRequestException('Invalid file type'), false);
-        }
-        callback(null, true);
-      },
-    }),
-  )
   @Post()
-  postMovie(
-    @Body() body: CreateMovieDto,
-    @Request() req,
-    @UploadedFile()
-    movie: Express.Multer.File,
-  ) {
-    return this.movieService.create(body, movie.filename, req.queryRunner);
+  postMovie(@Body() body: CreateMovieDto, @Request() req) {
+    return this.movieService.create(body, req.queryRunner);
   }
 
   @RBAC(Role.admin)

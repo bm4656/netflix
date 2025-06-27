@@ -63,7 +63,7 @@ export class MovieService {
     return movie;
   }
 
-  async create(createMovieDto: CreateMovieDto, queryRunner: QueryRunner) {
+  async create(createMovieDto: CreateMovieDto, userId: number, queryRunner: QueryRunner) {
     const director = await queryRunner.manager.findOne(Director, {
       where: { id: createMovieDto.directorId },
     });
@@ -96,11 +96,6 @@ export class MovieService {
     const movieFolder = join('public', 'movie');
     const tempFolder = join('public', 'temp');
 
-    await rename(
-      join(tempFolder, createMovieDto.movieFileName),
-      join(movieFolder, createMovieDto.movieFileName),
-    );
-
     const movie = await queryRunner.manager
       .createQueryBuilder()
       .insert()
@@ -120,6 +115,11 @@ export class MovieService {
       .relation(Movie, 'genres')
       .of(movieId)
       .add(genres.map((genre) => genre.id));
+
+    await rename(
+      join(tempFolder, createMovieDto.movieFileName),
+      join(movieFolder, createMovieDto.movieFileName),
+    );
 
     return await queryRunner.manager.findOne(Movie, {
       where: { id: movieId },

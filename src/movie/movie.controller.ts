@@ -67,8 +67,7 @@ export class MovieController {
     @UploadedFile()
     movie: Express.Multer.File,
   ) {
-    console.log(movie);
-    return this.movieService.create(body, req.queryRunner);
+    return this.movieService.create(body, movie.filename, req.queryRunner);
   }
 
   @RBAC(Role.admin)

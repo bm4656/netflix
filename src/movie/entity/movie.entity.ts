@@ -27,6 +27,9 @@ export class Movie extends BaseTable {
   })
   title: string;
 
+  @Column()
+  movieFilePath: string;
+
   @OneToOne(() => MovieDetail, (movieDetail) => movieDetail.movie, {
     cascade: true, // Create, Update, Delete 시 함께 처리
     nullable: false,

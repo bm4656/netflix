@@ -33,7 +33,7 @@ export class MovieService {
     private readonly commonService: CommonService,
   ) {}
 
-  async findAll(dto: GetMoviesDto) {
+  async findAll(dto: GetMoviesDto, userId?: number) {
     const { title } = dto;
 
     const qb = this.movieRepository
@@ -48,7 +48,39 @@ export class MovieService {
     // this.commonService.applyPagePaginationParamsToQb(qb, dto);
     const { nextCursor } = await this.commonService.applyCursorPaginationParamsToQb(qb, dto);
 
-    const [data, count] = await qb.getManyAndCount();
+    let [data, count] = await qb.getManyAndCount();
+
+    if (userId) {
+      const movieIds = data.map((movie) => movie.id);
+
+      const likeMovies = await this.movieUserLikeRepository
+        .createQueryBuilder('mul')
+        .leftJoinAndSelect('mul.movie', 'movie')
+        .leftJoinAndSelect('mul.user', 'user')
+        .where('movie.id IN (:...movieIds)', { movieIds })
+        .andWhere('mul.userId = :userId', { userId })
+        .getMany();
+
+      /**
+       * {
+       *   movieId: boolean
+       * }
+       */
+      const likeMovieMap = likeMovies.reduce(
+        (acc, next) => ({
+          ...acc,
+          [next.movie.id]: next.isLike,
+        }),
+        {},
+      );
+
+      data = data.map((x) => ({
+        ...x,
+        //  null || true || false
+        likeStatus: x.id in likeMovieMap ? likeMovieMap[x.id] : null,
+      }));
+    }
+
     return {
       data,
       nextCursor, // 커서가 있으면 다음 페이지를 요청할 때 사용

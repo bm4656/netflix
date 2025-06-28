@@ -7,35 +7,13 @@ import { MovieDetail } from './entity/movie-detail.entity';
 import { Director } from '../director/entity/director.entity';
 import { Genre } from '../genre/entity/genre.entity';
 import { CommonModule } from '../common/common.module';
+import { MovieUserLike } from './entity/movie-user-like.entity';
+import { User } from '../user/entity/user.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Movie, MovieDetail, Director, Genre]),
+    TypeOrmModule.forFeature([Movie, MovieDetail, MovieUserLike, Director, Genre, User]),
     CommonModule,
-    // MulterModule.register({
-    //   storage: diskStorage({
-    //     // ......../netflix/public/movie
-    //     // mac : process.cwd() + '/public' + '/movie'
-    //     // windows : process.cwd() + '\public' + '\movie'
-    //     // 위와 같이 경로를 지정하면 운영체제에 따라 다르게 동작할 수 있으므로 join을 사용
-    //     destination: join(process.cwd(), 'public', 'movie'),
-    //     filename: function (
-    //       req: Express.Request,
-    //       file: Express.Multer.File,
-    //       callback: (error: Error | null, filename: string) => void,
-    //     ) {
-    //       const split = file.originalname.split('.');
-    //
-    //       let extension = 'mp4';
-    //
-    //       if (split.length > 1) {
-    //         extension = split[split.length - 1];
-    //       }
-    //
-    //       callback(null, `${v4()}_${Date.now()}.${extension}`);
-    //     },
-    //   }),
-    // }),
   ],
   controllers: [MovieController],
   providers: [MovieService],

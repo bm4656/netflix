@@ -8,14 +8,18 @@ export class MovieUserLike {
     name: 'movieId',
     type: 'int8',
   })
-  @ManyToOne(() => Movie, (movie) => movie.likeUsers)
+  @ManyToOne(() => Movie, (movie) => movie.likeUsers, {
+    onDelete: 'CASCADE',
+  })
   movie: Movie;
 
   @PrimaryColumn({
     name: 'userId',
     type: 'int8',
   })
-  @ManyToOne(() => User, (user) => user.likeMovies)
+  @ManyToOne(() => User, (user) => user.likeMovies, {
+    onDelete: 'CASCADE',
+  })
   user: User;
 
   @Column()

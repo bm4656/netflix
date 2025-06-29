@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  Inject,
   Injectable,
   NestMiddleware,
   UnauthorizedException,
@@ -8,12 +9,15 @@ import { NextFunction, Request, Response } from 'express';
 import { envVariableKeys } from '../../common/const/env.const';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
 
 @Injectable()
 export class BearerTokenMiddleware implements NestMiddleware {
   constructor(
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
+    @Inject(CACHE_MANAGER)
+    private readonly cacheManager: Cache,
   ) {}
 
   async use(req: Request, res: Response, next: NextFunction) {
@@ -26,6 +30,16 @@ export class BearerTokenMiddleware implements NestMiddleware {
 
     try {
       const token = await this.validateBearerToken(authHeader);
+
+      const tokenKey = `token:${token}`;
+
+      const cachedPayload = await this.cacheManager.get(tokenKey);
+
+      if (cachedPayload) {
+        console.log('--- 토큰 캐시에서 조회 ---');
+        req.user = cachedPayload;
+        return next();
+      }
 
       const decodedPayload = await this.jwtService.decode(token);
 
@@ -41,6 +55,14 @@ export class BearerTokenMiddleware implements NestMiddleware {
       const payload = await this.jwtService.verifyAsync(token, {
         secret: this.configService.get<string>(secretKey),
       });
+
+      // payload['exp'] -> epoch time seconds
+      const expiryDate = +new Date(payload['exp'] * 1000);
+      const now = +new Date();
+
+      const differenceInSeconds = (expiryDate - now) / 1000;
+
+      await this.cacheManager.set(tokenKey, payload, Math.max(differenceInSeconds - 30, 1) * 1000);
 
       req.user = payload;
       next();

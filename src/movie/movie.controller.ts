@@ -43,7 +43,6 @@ export class MovieController {
   // @CacheKey('movies-recent') // CacheKey을 사용하여 캐시 키를 명시적으로 설정할 수 있다. -> 쿼리가 변경되어도 같은 키 값에 캐시가 저장된다.
   // @CacheTTL(1000)
   getMoviesRecent() {
-    console.log('getMoviesRecent called');
     return this.movieService.findRecent();
   }
 

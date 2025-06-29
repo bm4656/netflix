@@ -22,6 +22,7 @@ import { TransactionInterceptor } from '../common/interceptor/transaction.interc
 import { UserId } from '../user/decorator/user-id.decorator';
 import { QueryRunner } from '../common/decorator/query-runner.decorator';
 import { QueryRunner as QR } from 'typeorm';
+import { CacheInterceptor } from '@nestjs/cache-manager';
 
 @Controller('movie')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -34,9 +35,15 @@ export class MovieController {
     return this.movieService.findAll(dto, userId);
   }
 
-  // 아래 :id에 걸릴 있으므로 그보다 위에 작성한다.
+  // CacheManager의 CacheInterceptor 사용 -> 자동으로 엔드포인트의 결과를 캐싱한다.
+  // CacheInterceptor는 기본적으로 메모리 캐시를 사용하며, TTL(Time To Live)을 설정할 수 있다.
+  // CacheInterceptor는 url과 쿼리 파라미터를 기반으로 캐시 키를 생성한다.
   @Get('recent')
+  @UseInterceptors(CacheInterceptor)
+  // @CacheKey('movies-recent') // CacheKey을 사용하여 캐시 키를 명시적으로 설정할 수 있다. -> 쿼리가 변경되어도 같은 키 값에 캐시가 저장된다.
+  // @CacheTTL(1000)
   getMoviesRecent() {
+    console.log('getMoviesRecent called');
     return this.movieService.findRecent();
   }
 

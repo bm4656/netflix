@@ -50,7 +50,7 @@ export class MovieService {
       take: 10,
     });
 
-    await this.cacheManager.set('recent-movies', data, 3000);
+    await this.cacheManager.set('recent-movies', data);
 
     return data;
   }

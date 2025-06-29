@@ -1,4 +1,4 @@
-import { Controller, Get, Headers, Post, Request, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Headers, Post, Request, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './strategy/local.strategy';
 import { JwtAuthGuard } from './strategy/jwt.strategy';
@@ -18,6 +18,12 @@ export class AuthController {
   @Post('login')
   login(@Headers('authorization') token: string) {
     return this.authService.login(token);
+  }
+
+  // 프로덕션에선 RBAC 어드민 적용하여 제한 필요
+  @Post('token/block')
+  tokenBlock(@Body('token') token: string) {
+    return this.authService.tokenBlock(token);
   }
 
   @Post('access-token')

@@ -34,6 +34,12 @@ export class MovieController {
     return this.movieService.findAll(dto, userId);
   }
 
+  // 아래 :id에 걸릴 있으므로 그보다 위에 작성한다.
+  @Get('recent')
+  getMoviesRecent() {
+    return this.movieService.findRecent();
+  }
+
   @Public()
   @Get(':id')
   getMovie(

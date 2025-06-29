@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { CreateMovieDto } from './dto/create-movie.dto';
 import { UpdateMovieDto } from './dto/update-movie.dto';
 import { Movie } from './entity/movie.entity';
@@ -13,6 +13,7 @@ import { join } from 'path';
 import { rename } from 'fs/promises';
 import { User } from '../user/entity/user.entity';
 import { MovieUserLike } from './entity/movie-user-like.entity';
+import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
 
 @Injectable()
 export class MovieService {
@@ -31,7 +32,28 @@ export class MovieService {
     private readonly userRepository: Repository<User>,
     private readonly dataSource: DataSource,
     private readonly commonService: CommonService,
+    @Inject(CACHE_MANAGER)
+    private readonly cacheManager: Cache,
   ) {}
+
+  async findRecent() {
+    const cacheData = await this.cacheManager.get<Movie[]>('recent-movies');
+
+    if (cacheData) {
+      return cacheData;
+    }
+
+    const data = await this.movieRepository.find({
+      order: {
+        createdAt: 'DESC',
+      },
+      take: 10,
+    });
+
+    await this.cacheManager.set('recent-movies', data, 3000);
+
+    return data;
+  }
 
   async findAll(dto: GetMoviesDto, userId?: number) {
     const { title } = dto;

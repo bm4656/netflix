@@ -28,7 +28,7 @@ export class TasksService {
    * 이 작업은 매 초마다 실행되며, public/temp 디렉토리의 파일 목록을 읽어와서 잉여 파일을 찾아 삭제
    * 파일명이 특정 패턴을 따르지 않거나, 24시간 이상 지난 파일들을 잉여 파일로 간주하여 삭제
    */
-  // @Cron('* * * * * *')
+  @Cron('* * * * * *')
   async eraseOrphanFiles() {
     const files = await readdir(join(process.cwd(), 'public', 'temp'));
 
@@ -60,7 +60,7 @@ export class TasksService {
     });
   }
 
-  // @Cron('0 * * * * *')
+  @Cron('0 * * * * *')
   async calculateMovieLikeCounts() {
     await this.movieRepository.query(
       `update movie m
@@ -79,30 +79,30 @@ export class TasksService {
     );
   }
 
-  @Cron('* * * * * *', {
-    name: 'printer',
-  })
-  printer() {
-    console.log('print every second');
-  }
+  // @Cron('* * * * * *', {
+  //   name: 'printer',
+  // })
+  // printer() {
+  //   console.log('print every second');
+  // }
 
-  @Cron('*/5 * * * * *')
-  stopper() {
-    console.log('----stopper run----');
-
-    const job = this.schedulerRegistry.getCronJob('printer');
-
-    console.log('# Last Date');
-    console.log(job.lastDate());
-    console.log('# Next Date');
-    console.log(job.nextDate());
-    console.log('# Next Dates');
-    console.log(job.nextDates(5));
-
-    if (job.isActive) {
-      job.stop();
-    } else {
-      job.start();
-    }
-  }
+  // @Cron('*/5 * * * * *')
+  // stopper() {
+  //   console.log('----stopper run----');
+  //
+  //   const job = this.schedulerRegistry.getCronJob('printer');
+  //
+  //   console.log('# Last Date');
+  //   console.log(job.lastDate());
+  //   console.log('# Next Date');
+  //   console.log(job.nextDate());
+  //   console.log('# Next Dates');
+  //   console.log(job.nextDates(5));
+  //
+  //   if (job.isActive) {
+  //     job.stop();
+  //   } else {
+  //     job.start();
+  //   }
+  // }
 }

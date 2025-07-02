@@ -10,6 +10,7 @@ import {
   Post,
   Query,
   UseInterceptors,
+  Version,
 } from '@nestjs/common';
 import { MovieService } from './movie.service';
 import { CreateMovieDto } from './dto/create-movie.dto';
@@ -50,6 +51,7 @@ export class MovieController {
     count: 5,
     unit: 'minute',
   })
+  @Version('5')
   getMovies(@Query() dto: GetMoviesDto, @UserId() userId: number) {
     return this.movieService.findAll(dto, userId);
   }

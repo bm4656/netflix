@@ -3,11 +3,17 @@ import { readdir, unlink } from 'fs/promises';
 import { join, parse } from 'path';
 import * as process from 'node:process';
 import { Cron } from '@nestjs/schedule';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Movie } from '../movie/entity/movie.entity';
+import { Repository } from 'typeorm';
 
 // 스케줄러 모듈로 분리 필요 -> 편의상 지금은 common 모듈에 포함
 @Injectable()
 export class TasksService {
-  constructor() {}
+  constructor(
+    @InjectRepository(Movie)
+    private readonly movieRepository: Repository<Movie>,
+  ) {}
 
   logEverySecond() {
     console.log('매 초마다 실행되는 작업입니다.');
@@ -51,5 +57,24 @@ export class TasksService {
     ).catch((e) => {
       console.error('파일 삭제 중 오류 발생:', e);
     });
+  }
+
+  @Cron('0 * * * * *')
+  async calculateMovieLikeCounts() {
+    await this.movieRepository.query(
+      `update movie m
+       set "likeCount" = (select count(*)
+                          from movie_user_like mul
+                          where "movieId" = m.id
+                            and mul."isLike" = true);`,
+    );
+
+    await this.movieRepository.query(
+      `update movie m
+       set "dislikeCount" = (select count(*)
+                             from movie_user_like mul
+                             where "movieId" = m.id
+                               and mul."isLike" = false);`,
+    );
   }
 }

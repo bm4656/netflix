@@ -8,7 +8,6 @@ async function bootstrap() {
   app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
   app.enableVersioning({
     type: VersioningType.URI,
-    defaultVersion: ['1', '2'],
   });
   app.useGlobalPipes(
     new ValidationPipe({

@@ -25,7 +25,21 @@ import { QueryRunner as QR } from 'typeorm';
 import { CacheInterceptor } from '@nestjs/cache-manager';
 import { Throttle } from '../common/decorator/throttle.decorator';
 
-@Controller('movie')
+@Controller({
+  path: 'movie',
+  version: ['2', '3'],
+})
+export class MovieController2 {
+  @Get()
+  getMovies() {
+    return [];
+  }
+}
+
+@Controller({
+  path: 'movie',
+  version: '1',
+})
 @UseInterceptors(ClassSerializerInterceptor)
 export class MovieController {
   constructor(private readonly movieService: MovieService) {}

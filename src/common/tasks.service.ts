@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { readdir, unlink } from 'fs/promises';
 import { join, parse } from 'path';
 import * as process from 'node:process';
@@ -6,19 +6,21 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Movie } from '../movie/entity/movie.entity';
 import { Repository } from 'typeorm';
 import { Cron, SchedulerRegistry } from '@nestjs/schedule';
+import { DefaultLogger } from './logger/default.logger';
 
 // 스케줄러 모듈로 분리 필요 -> 편의상 지금은 common 모듈에 포함
 @Injectable()
 export class TasksService {
-  private readonly logger = new Logger(TasksService.name);
+  // private readonly logger = new Logger(TasksService.name);
 
   constructor(
     @InjectRepository(Movie)
     private readonly movieRepository: Repository<Movie>,
     private readonly schedulerRegistry: SchedulerRegistry,
+    private readonly logger: DefaultLogger,
   ) {}
 
-  // @Cron('5 * * * * *')
+  @Cron('*/5 * * * * *')
   logEverySecond() {
     this.logger.fatal('FATAL 레벨 로그');
     this.logger.error('ERROR 레벨 로그');

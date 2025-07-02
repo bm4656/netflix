@@ -1,9 +1,11 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
+import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
   app.useGlobalPipes(
     new ValidationPipe({
       // 기본값 false, true로 설정하면 DTO에 정의되지 않은 값들은 전달되지 않는다.(원래는 들어가버림)

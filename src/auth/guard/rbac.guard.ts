@@ -8,6 +8,7 @@ export class RBACGuard implements CanActivate {
   constructor(private readonly reflector: Reflector) {}
 
   canActivate(context: ExecutionContext): boolean {
+    // @RBAC 데코레이터에 설정된 ROLE ENUM 값을 가져옴
     const role = this.reflector.get<Role>(RBAC, context.getHandler());
 
     // ROLE ENUM에 해당하는 값이 데코레이터에 들어갔는지 확인

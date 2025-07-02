@@ -31,6 +31,7 @@ export class ThrottleInterceptor implements NestInterceptor {
       return next.handle();
     }
 
+    // @Throttle 데코레이터에 설정된 옵션을 가져옴
     const throttleOptions = this.reflector.get<{
       count: number;
       unit: 'minute';

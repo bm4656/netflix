@@ -2,10 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { readdir, unlink } from 'fs/promises';
 import { join, parse } from 'path';
 import * as process from 'node:process';
-import { Cron } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Movie } from '../movie/entity/movie.entity';
 import { Repository } from 'typeorm';
+import { Cron, SchedulerRegistry } from '@nestjs/schedule';
 
 // 스케줄러 모듈로 분리 필요 -> 편의상 지금은 common 모듈에 포함
 @Injectable()
@@ -13,6 +13,7 @@ export class TasksService {
   constructor(
     @InjectRepository(Movie)
     private readonly movieRepository: Repository<Movie>,
+    private readonly schedulerRegistry: SchedulerRegistry,
   ) {}
 
   logEverySecond() {
@@ -27,7 +28,7 @@ export class TasksService {
    * 이 작업은 매 초마다 실행되며, public/temp 디렉토리의 파일 목록을 읽어와서 잉여 파일을 찾아 삭제
    * 파일명이 특정 패턴을 따르지 않거나, 24시간 이상 지난 파일들을 잉여 파일로 간주하여 삭제
    */
-  @Cron('* * * * * *')
+  // @Cron('* * * * * *')
   async eraseOrphanFiles() {
     const files = await readdir(join(process.cwd(), 'public', 'temp'));
 
@@ -59,7 +60,7 @@ export class TasksService {
     });
   }
 
-  @Cron('0 * * * * *')
+  // @Cron('0 * * * * *')
   async calculateMovieLikeCounts() {
     await this.movieRepository.query(
       `update movie m
@@ -76,5 +77,32 @@ export class TasksService {
                              where "movieId" = m.id
                                and mul."isLike" = false);`,
     );
+  }
+
+  @Cron('* * * * * *', {
+    name: 'printer',
+  })
+  printer() {
+    console.log('print every second');
+  }
+
+  @Cron('*/5 * * * * *')
+  stopper() {
+    console.log('----stopper run----');
+
+    const job = this.schedulerRegistry.getCronJob('printer');
+
+    console.log('# Last Date');
+    console.log(job.lastDate());
+    console.log('# Next Date');
+    console.log(job.nextDate());
+    console.log('# Next Dates');
+    console.log(job.nextDates(5));
+
+    if (job.isActive) {
+      job.stop();
+    } else {
+      job.start();
+    }
   }
 }

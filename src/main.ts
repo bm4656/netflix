@@ -7,8 +7,8 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
   app.enableVersioning({
-    type: VersioningType.HEADER,
-    header: 'version',
+    type: VersioningType.MEDIA_TYPE,
+    key: 'v=',
   });
   app.useGlobalPipes(
     new ValidationPipe({

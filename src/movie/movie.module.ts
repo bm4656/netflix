@@ -15,7 +15,7 @@ import { User } from '../user/entity/user.entity';
     TypeOrmModule.forFeature([Movie, MovieDetail, MovieUserLike, Director, Genre, User]),
     CommonModule,
   ],
-  controllers: [MovieController, MovieController2],
+  controllers: [MovieController2, MovieController],
   providers: [MovieService],
 })
 export class MovieModule {}

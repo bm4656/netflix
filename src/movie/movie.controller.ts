@@ -10,6 +10,7 @@ import {
   Post,
   Query,
   UseInterceptors,
+  VERSION_NEUTRAL,
 } from '@nestjs/common';
 import { MovieService } from './movie.service';
 import { CreateMovieDto } from './dto/create-movie.dto';
@@ -38,7 +39,7 @@ export class MovieController2 {
 
 @Controller({
   path: 'movie',
-  version: '1',
+  version: VERSION_NEUTRAL,
 })
 @UseInterceptors(ClassSerializerInterceptor)
 export class MovieController {

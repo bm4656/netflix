@@ -22,7 +22,7 @@ export class TasksService {
     private readonly logger: LoggerService,
   ) {}
 
-  @Cron('*/5 * * * * *')
+  // @Cron('*/5 * * * * *')
   logEverySecond() {
     // this.logger.fatal('FATAL 레벨 로그', null, TasksService.name);
     this.logger.error('ERROR 레벨 로그', null, TasksService.name); // 실제 에러 발생 시 두번째 인자로 에러 객체를 전달

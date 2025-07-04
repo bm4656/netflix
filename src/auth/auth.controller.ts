@@ -3,6 +3,7 @@ import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './strategy/local.strategy';
 import { JwtAuthGuard } from './strategy/jwt.strategy';
 import { Public } from './decorator/public.decorator';
+import { ApiBasicAuth } from '@nestjs/swagger';
 
 @Controller('auth')
 export class AuthController {
@@ -15,6 +16,7 @@ export class AuthController {
   }
 
   @Public()
+  @ApiBasicAuth()
   @Post('login')
   login(@Headers('authorization') token: string) {
     return this.authService.login(token);

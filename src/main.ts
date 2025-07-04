@@ -12,6 +12,8 @@ async function bootstrap() {
   const config = new DocumentBuilder()
     .setTitle('NestJS Netflix API')
     .setDescription('코드팩토리 NestJS 강의')
+    .addBasicAuth()
+    .addBearerAuth()
     .setVersion('1.0')
     .build();
 

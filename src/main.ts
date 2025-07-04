@@ -19,7 +19,11 @@ async function bootstrap() {
 
   const document = SwaggerModule.createDocument(app, config);
 
-  SwaggerModule.setup('doc', app, document);
+  SwaggerModule.setup('doc', app, document, {
+    swaggerOptions: {
+      persistAuthorization: true, // Swagger UI에서 인증 정보를 유지하도록 설정
+    },
+  });
 
   app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
   app.useGlobalPipes(

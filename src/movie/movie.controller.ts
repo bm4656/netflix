@@ -24,7 +24,7 @@ import { QueryRunner } from '../common/decorator/query-runner.decorator';
 import { QueryRunner as QR } from 'typeorm';
 import { CacheInterceptor } from '@nestjs/cache-manager';
 import { Throttle } from '../common/decorator/throttle.decorator';
-import { ApiBearerAuth } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 @Controller('movie')
 @ApiBearerAuth()
@@ -37,6 +37,17 @@ export class MovieController {
   @Throttle({
     count: 5,
     unit: 'minute',
+  })
+  @ApiOperation({
+    summary: '[Movie] Pagination하는 API',
+  })
+  @ApiResponse({
+    status: 200,
+    description: '성공적으로 영화 목록을 반환함',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Pagination에 필요한 쿼리 파라미터가 누락되었거나 잘못된 경우',
   })
   getMovies(@Query() dto: GetMoviesDto, @UserId() userId: number) {
     return this.movieService.findAll(dto, userId);

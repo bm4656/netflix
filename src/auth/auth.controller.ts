@@ -1,9 +1,10 @@
-import { Body, Controller, Get, Headers, Post, Request, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Request, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './strategy/local.strategy';
 import { JwtAuthGuard } from './strategy/jwt.strategy';
 import { Public } from './decorator/public.decorator';
 import { ApiBasicAuth } from '@nestjs/swagger';
+import { Authorization } from './decorator/authorization.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -11,14 +12,14 @@ export class AuthController {
 
   @Public()
   @Post('register')
-  register(@Headers('authorization') token: string) {
+  register(@Authorization() token: string) {
     return this.authService.register(token);
   }
 
   @Public()
   @ApiBasicAuth()
   @Post('login')
-  login(@Headers('authorization') token: string) {
+  login(@Authorization() token: string) {
     return this.authService.login(token);
   }
 

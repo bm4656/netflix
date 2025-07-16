@@ -1,8 +1,8 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { BaseTable } from '../../common/entity/base-table.entity';
+import { BaseTable } from 'src/common/entity/base-table.entity';
 import { Exclude } from 'class-transformer';
-import { Movie } from '../../movie/entity/movie.entity';
-import { MovieUserLike } from '../../movie/entity/movie-user-like.entity';
+import { Movie } from 'src/movie/entity/movie.entity';
+import { MovieUserLike } from 'src/movie/entity/movie-user-like.entity';
 
 export enum Role {
   admin,

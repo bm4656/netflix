@@ -3,6 +3,7 @@ import { UserService } from './user.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { User } from './entity/user.entity';
 import { NotFoundException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 
 const mockUserRepository = {
   findOne: jest.fn(),
@@ -10,6 +11,10 @@ const mockUserRepository = {
   save: jest.fn(),
   update: jest.fn(),
   delete: jest.fn(),
+};
+
+const mockCongigService = {
+  get: jest.fn(),
 };
 
 describe('UserService', () => {
@@ -24,6 +29,10 @@ describe('UserService', () => {
           // Module에서 TypeORM.forFeature([User])와 같은 역할을 함
           provide: getRepositoryToken(User),
           useValue: mockUserRepository, // 해당 레포지토리로 대체해서 사용하도록 설정
+        },
+        {
+          provide: ConfigService,
+          useValue: mockCongigService,
         },
       ],
     }).compile();

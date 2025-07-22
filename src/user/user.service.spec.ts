@@ -6,6 +6,7 @@ import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 const mockUserRepository = {
   findOne: jest.fn(),
@@ -42,6 +43,10 @@ describe('UserService', () => {
     userService = module.get<UserService>(UserService);
   });
 
+  afterEach(() => {
+    jest.clearAllMocks(); // 각 테스트 후에 mock 함수들을 초기화
+  });
+
   it('should be defined', () => {
     expect(userService).toBeDefined();
   });
@@ -63,7 +68,7 @@ describe('UserService', () => {
 
       jest.spyOn(mockUserRepository, 'findOne').mockResolvedValueOnce(null);
       jest.spyOn(mockCongigService, 'get').mockReturnValue(hashRounds);
-      jest.spyOn(bcrypt, 'hash').mockImplementation((password, hashRound) => hashedPassword);
+      jest.spyOn(bcrypt, 'hash').mockImplementation((password, hashRounds) => hashedPassword);
       jest.spyOn(mockUserRepository, 'findOne').mockResolvedValueOnce(result);
 
       const createdUser = await userService.create(createUserDto);
@@ -139,7 +144,65 @@ describe('UserService', () => {
       await expect(userService.findOne(999)).rejects.toThrow(NotFoundException);
       expect(mockUserRepository.findOne).toHaveBeenCalledWith({ where: { id: 999 } });
     });
+  });
 
+  describe('update', () => {
+    it('should update a user and return the updated user', async () => {
+      const updateUserDto: UpdateUserDto = {
+        email: 'test@test.ai',
+        password: 'newPassword',
+      };
+      const hashRounds = 10;
+      const hashedPassword = 'hashedPasswordhashshshshsh';
+      const id = 1;
+      const user = {
+        id: 1,
+        email: updateUserDto.email,
+      };
+
+      jest.spyOn(mockUserRepository, 'findOne').mockResolvedValueOnce(user);
+      jest.spyOn(mockCongigService, 'get').mockReturnValue(hashRounds);
+      jest.spyOn(bcrypt, 'hash').mockImplementation((password, hashRounds) => hashedPassword);
+      // jest.spyOn(mockUserRepository.update).mockResolvedValue(null);
+      jest.spyOn(mockUserRepository, 'findOne').mockResolvedValueOnce({
+        ...user,
+        password: hashedPassword,
+      });
+
+      const result = await userService.update(id, updateUserDto);
+
+      expect(result).toEqual({
+        ...user,
+        password: hashedPassword,
+      });
+      expect(mockUserRepository.findOne).toHaveBeenCalledWith({ where: { id } });
+      expect(mockCongigService.get).toHaveBeenCalledWith(expect.anything());
+      expect(bcrypt.hash).toHaveBeenCalledWith(updateUserDto.password, hashRounds);
+      expect(mockUserRepository.update).toHaveBeenCalledWith(
+        { id },
+        {
+          ...updateUserDto,
+          password: hashedPassword,
+        },
+      );
+      expect(mockUserRepository.findOne).toHaveBeenCalledWith({ where: { id } });
+    });
+
+    it('should throw NotFoundException if user does not exist on update', async () => {
+      const updateUserDto: UpdateUserDto = {
+        email: 'test@test.ai',
+        password: 'newPassword',
+      };
+
+      jest.spyOn(mockUserRepository, 'findOne').mockResolvedValue(null);
+
+      await expect(userService.update(999, updateUserDto)).rejects.toThrow(NotFoundException);
+      expect(mockUserRepository.findOne).toHaveBeenCalledWith({ where: { id: 999 } });
+      expect(mockUserRepository.update).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('delete', () => {
     it('should delete a user by id', async () => {
       const id = 999;
 

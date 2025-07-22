@@ -32,9 +32,13 @@ export class UserService {
       this.configService.get<number>(envVariableKeys.hashRounds),
     );
 
-    return await this.userRepository.save({
+    await this.userRepository.save({
       email,
       password: hash,
+    });
+
+    return this.userRepository.findOne({
+      where: { email },
     });
   }
 

@@ -67,7 +67,12 @@ export class UserService {
       throw new NotFoundException('존재하지 않는 ID의 사용자입니다.');
     }
 
-    await this.userRepository.update({ id }, updateUserDto);
+    const hash = await bcrypt.hash(
+      updateUserDto.password,
+      this.configService.get<number>(envVariableKeys.hashRounds),
+    );
+
+    await this.userRepository.update({ id }, { ...updateUserDto, password: hash });
 
     return this.userRepository.findOne({
       where: { id },

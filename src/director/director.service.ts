@@ -17,7 +17,7 @@ export class DirectorService {
   }
 
   async findOne(id: number) {
-    const director = await this.directorRepository.find({
+    const director = await this.directorRepository.findOne({
       where: { id },
     });
 
@@ -33,7 +33,7 @@ export class DirectorService {
   }
 
   async update(id: number, updateDirectorDto: UpdateDirectorDto) {
-    const director = await this.directorRepository.find({
+    const director = await this.directorRepository.findOne({
       where: { id },
     });
 
@@ -43,7 +43,7 @@ export class DirectorService {
 
     await this.directorRepository.update({ id }, updateDirectorDto);
 
-    const newDirector = await this.directorRepository.find({
+    const newDirector = await this.directorRepository.findOne({
       where: { id },
     });
 
@@ -51,7 +51,7 @@ export class DirectorService {
   }
 
   async remove(id: number) {
-    const director = await this.directorRepository.find({
+    const director = await this.directorRepository.findOne({
       where: { id },
     });
 
@@ -59,7 +59,7 @@ export class DirectorService {
       throw new NotFoundException('존재하지 않는 ID의 감독입니다.');
     }
 
-    await this.directorRepository.delete({ id });
+    await this.directorRepository.delete(id);
 
     return id;
   }

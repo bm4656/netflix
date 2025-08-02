@@ -57,7 +57,7 @@ export class GenreService {
       throw new NotFoundException('존재하지 않는 ID의 장르입니다.');
     }
 
-    await this.genreRepository.delete({ id });
+    await this.genreRepository.delete(id);
 
     return id;
   }

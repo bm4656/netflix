@@ -55,13 +55,30 @@ export class MovieService {
     return data;
   }
 
-  async findAll(dto: GetMoviesDto, userId?: number) {
-    const { title } = dto;
-
-    const qb = this.movieRepository
+  // 얘네는 테스트 커버리지 제외 -> 이부분은 어차피 typeorm이 하는거니까 우리가 테스트 할 필요 없음
+  /* istanbul ignore next */
+  async getMovies() {
+    return this.movieRepository
       .createQueryBuilder('movie')
       .leftJoinAndSelect('movie.director', 'director')
       .leftJoinAndSelect('movie.genres', 'genres');
+  }
+
+  /* istanbul ignore next */
+  async getLikedMovies(movieIds: number[], userId: number) {
+    return this.movieUserLikeRepository
+      .createQueryBuilder('mul')
+      .leftJoinAndSelect('mul.user', 'user')
+      .leftJoinAndSelect('mul.movie', 'movie')
+      .where('movie.id IN(:...movieIds)', { movieIds })
+      .andWhere('user.id = :userId', { userId })
+      .getMany();
+  }
+
+  async findAll(dto: GetMoviesDto, userId?: number) {
+    const { title } = dto;
+
+    const qb = await this.getMovies();
 
     if (title) {
       qb.where('movie.title LIKE :title', { title: `%${title}%` });
@@ -75,23 +92,14 @@ export class MovieService {
     if (userId) {
       const movieIds = data.map((movie) => movie.id);
 
-      const likeMovies =
-        movieIds.length < 1
-          ? []
-          : await this.movieUserLikeRepository
-              .createQueryBuilder('mul')
-              .leftJoinAndSelect('mul.movie', 'movie')
-              .leftJoinAndSelect('mul.user', 'user')
-              .where('movie.id IN (:...movieIds)', { movieIds })
-              .andWhere('mul.userId = :userId', { userId })
-              .getMany();
+      const likedMovies = await this.getLikedMovies(movieIds, userId);
 
       /**
        * {
        *   movieId: boolean
        * }
        */
-      const likeMovieMap = likeMovies.reduce(
+      const likeMovieMap = likedMovies.reduce(
         (acc, next) => ({
           ...acc,
           [next.movie.id]: next.isLike,
